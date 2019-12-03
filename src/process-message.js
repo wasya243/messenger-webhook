@@ -1,12 +1,12 @@
 const fetch = require('node-fetch');
-
-const projectId = 'sample-bot-ylpohg';
-const sessionId = '123456';
-const languageCode = 'en-US';
-
 const dialogflow = require('dialogflow');
 
-const {FACEBOOK_ACCESS_TOKEN, DIALOGFLOW_PRIVATE_KEY, DIALOGFLOW_CLIENT_EMAIL} = process.env;
+
+const {FACEBOOK_ACCESS_TOKEN, DIALOGFLOW_PRIVATE_KEY, DIALOGFLOW_CLIENT_EMAIL, PROJECT_ID} = process.env;
+
+const projectId = PROJECT_ID;
+const sessionId = '123456';
+const languageCode = 'en-US';
 
 const config = {
     credentials: {
