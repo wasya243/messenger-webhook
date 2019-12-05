@@ -24,10 +24,6 @@ module.exports = async (event) => {
     const userId = event.sender.id;
     const message = event.message.text;
 
-    // instead of logging
-    console.log('sender id: ', event.sender.id);
-    console.log('recipient id: : ', event.recipient.id);
-
     const request = {
         session: sessionPath,
         queryInput: {
