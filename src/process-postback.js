@@ -38,8 +38,7 @@ module.exports = async (event) => {
       const message = `${greeting} Welcome to my chatbot!`;
 
       return sendTextMessage(senderID, message);
-      // TODO: solve problem with persistent menu setup & change payload value
-  } else if(payload === 'CARE_HELP') {
+  } else if(payload === 'GET_REMINDERS_LIST') {
       const [user] = await User.aggregate([
           {
               $match: {
