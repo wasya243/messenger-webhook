@@ -1,6 +1,8 @@
 const fetch = require('node-fetch');
 
 const {User} = require('./db/models/user');
+// const {Reminder} = require('./db/models/reminder');
+
 const sendTextMessage = require('./send-message');
 
 const {FACEBOOK_ACCESS_TOKEN} = process.env;
@@ -21,6 +23,7 @@ module.exports = async (event) => {
       const userInfo = await response.json();
 
       const createdUser = await new User({firstName: userInfo.first_name, lastName: userInfo.last_name, facebookID: userInfo.id}).save();
+      // const createdReminder = await new Reminder({user: createdUser.id, comment: `Test comment from user ${createdUser.id}`}).save();
 
       // compose response message to pressing Get started button
       const greeting = `Hello ${createdUser.firstName} ${createdUser.lastName}.`;
