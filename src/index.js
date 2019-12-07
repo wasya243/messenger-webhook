@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 
 const {PORT} = process.env;
 
+const db = require('./db');
 const verifyWebhook = require('./verify-webhook');
 const messageWebhook = require('./message-webhook');
 
@@ -16,4 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/', verifyWebhook);
 app.post('/', messageWebhook);
 
-app.listen(PORT || 5000, () => console.log('Express server is listening on port 5000'));
+db.connect()
+    .then(() => {
+        app.listen(PORT || 5000, () => console.log('Express server is listening on port 5000'));
+    });

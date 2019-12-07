@@ -22,7 +22,7 @@ module.exports = (req, res) => {
                     await processPostback(webhook_event);
                 }
             } catch (error) {
-
+                console.error('Error is: ', error);
             }
         });
     }
