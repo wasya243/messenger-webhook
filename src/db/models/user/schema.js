@@ -6,7 +6,9 @@ const {Types: mongooseTypes} = mongoose.Schema;
 const userSchema = new mongoose.Schema({
     facebookID: {
         type: mongooseTypes.String,
-        required: true
+        required: true,
+        // TODO: uncomment for prod. It is done to ease development process
+        // unique: true
     },
     firstName: {
         type: mongooseTypes.String,
