@@ -12,10 +12,10 @@ const userSchema = new mongoose.Schema({
         type: mongooseTypes.String,
         required: true
     },
-    // lastName: {
-    //     type: mongooseTypes.String,
-    //     required: true
-    // },
+    lastName: {
+        type: mongooseTypes.String,
+        required: true
+    },
     createdAt: {
         type: mongooseTypes.Date,
         default: Date.now()
