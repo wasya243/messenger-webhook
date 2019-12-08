@@ -6,8 +6,8 @@ const bodyParser = require('body-parser');
 const {PORT} = process.env;
 
 const db = require('./db');
-const verifyWebhook = require('./verify-webhook');
-const messageWebhook = require('./message-webhook');
+const verifyWebhook = require('./webhooks/verify-webhook');
+const messageWebhook = require('./webhooks/message-webhook');
 
 const app = express();
 
