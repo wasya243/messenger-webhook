@@ -5,6 +5,7 @@ const {Reminder} = require('../db/models/reminder');
 const sendTextMessage = require('../send-message');
 
 // TODO: think of error handling
+// TODO: I din't find any other way to pass reminder id other than payload. Try to find a new solution if it exists.
 
 async function removeReminder(payload, senderID) {
     const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
