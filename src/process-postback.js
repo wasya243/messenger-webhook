@@ -1,11 +1,13 @@
 const fetch = require('node-fetch');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 
 const {User} = require('./db/models/user');
-const mongooseTypes = mongoose.Types;
-const {Reminder} = require('./db/models/reminder');
+// const mongooseTypes = mongoose.Types;
+// const {Reminder} = require('./db/models/reminder');
 
 const sendTextMessage = require('./send-message');
+
+const {muteReminder, unmuteReminder, removeReminder} = require('./postback-handlers');
 
 const {FACEBOOK_ACCESS_TOKEN} = process.env;
 
@@ -103,23 +105,11 @@ module.exports = async (event) => {
 
         return sendReminders(senderID, userReminders);
 
-    } else if(payload.includes('REMOVE_REMINDER')) {
-        const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
-
-        await Reminder.findByIdAndDelete(reminderId);
-
-        return sendTextMessage(senderID, `Reminder is deleted successfully`);
-    } else if(payload.startsWith('MUTE_REMINDER')) {
-        const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
-
-        await Reminder.findOneAndUpdate({_id: reminderId}, {$set: {isMuted: true}}, {new: true});
-
-        return sendTextMessage(senderID, `Reminder is muted successfully`);
-    } else if(payload.startsWith('UNMUTE_REMINDER')) {
-        const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
-
-        await Reminder.findOneAndUpdate({_id: reminderId}, {$set: {isMuted: false}}, {new: true});
-
-        return sendTextMessage(senderID, `Reminder is unmuted successfully`);
+    } else if (payload.includes('REMOVE_REMINDER')) {
+        await removeReminder(payload, senderID);
+    } else if (payload.startsWith('MUTE_REMINDER')) {
+        await muteReminder(payload, senderID);
+    } else if (payload.startsWith('UNMUTE_REMINDER')) {
+        await unmuteReminder(payload, senderID);
     }
 };
