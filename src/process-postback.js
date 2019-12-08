@@ -1,61 +1,125 @@
 const fetch = require('node-fetch');
+const mongoose = require('mongoose');
 
 const {User} = require('./db/models/user');
-// const {Reminder} = require('./db/models/reminder');
+const mongooseTypes = mongoose.Types;
+const {Reminder} = require('./db/models/reminder');
 
 const sendTextMessage = require('./send-message');
 
 const {FACEBOOK_ACCESS_TOKEN} = process.env;
 
-// TODO: think of how to send list of reminders back
-function composeMessageFromReminders(reminders) {
-    return reminders.reduce((ac, cv) => {
-        return `${ac}\n${cv.comment}`;
-    }, '');
+function sendReminders(userId, reminders) {
+
+    const elements = reminders.map(reminder => {
+        return {
+            image_url: 'https://ibb.co/xFmS8Z9',
+            title: 'Reminder',
+            subtitle: reminder.comment,
+            buttons: [
+                {
+                    type: 'postback',
+                    title: 'Delete',
+                    payload: `REMOVE_REMINDER/${reminder._id}`
+                },
+                {
+                    type: 'postback',
+                    title: reminder.isMuted ? 'Unmute' : 'Mute',
+                    payload: reminder.isMuted ? `UNMUTE_REMINDER/${reminder._id}` : `MUTE_REMINDER/${reminder._id}`
+                }
+            ]
+        };
+    });
+
+    return fetch(
+        `https://graph.facebook.com/v5.0/me/messages?access_token=${FACEBOOK_ACCESS_TOKEN}`,
+        {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                recipient: {
+                    id: userId,
+                },
+                message: {
+                    attachment: {
+                        type: "template",
+                        payload: {
+                            template_type: "generic",
+                            elements
+                        }
+                    }
+                }
+            }),
+        }
+    );
 }
 
 module.exports = async (event) => {
-  const payload = event.postback.payload;
-  const senderID = event.sender.id;
-  // const recipientID = event.recipient.id;
-  // TODO: think of splitting postback handlers into separate functions
-  if(payload === 'WELCOME') {
-      // prepare fields to fetch in order to compose greeting message
-      const fieldsToFetch = 'first_name,last_name';
+    const payload = event.postback.payload;
+    const senderID = event.sender.id;
 
-      const response = await fetch(
-          `https://graph.facebook.com/v5.0/${senderID}?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=${fieldsToFetch}`,
-          { method: 'GET' }
-      );
+    // TODO: think of splitting postback handlers into separate functions
+    if (payload === 'WELCOME') {
+        // prepare fields to fetch in order to compose greeting message
+        const fieldsToFetch = 'first_name,last_name';
 
-      const userInfo = await response.json();
+        const response = await fetch(
+            `https://graph.facebook.com/v5.0/${senderID}?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=${fieldsToFetch}`,
+            {method: 'GET'}
+        );
 
-      const createdUser = await new User({firstName: userInfo.first_name, lastName: userInfo.last_name, facebookID: userInfo.id}).save();
-      // const createdReminder = await new Reminder({user: createdUser.id, comment: `Test comment from user ${createdUser.id}`}).save();
+        const userInfo = await response.json();
 
-      // compose response message to pressing Get started button
-      const greeting = `Hello ${createdUser.firstName} ${createdUser.lastName}.`;
-      const message = `${greeting} Welcome to my chatbot!`;
+        const createdUser = await new User({
+            firstName: userInfo.first_name,
+            lastName: userInfo.last_name,
+            facebookID: userInfo.id
+        }).save();
 
-      return sendTextMessage(senderID, message);
-  } else if(payload === 'GET_REMINDERS_LIST') {
-      const [user] = await User.aggregate([
-          {
-              $match: {
-                  facebookID: senderID
-              }
-          },
-          {
-              $lookup: {
-                  localField: '_id',
-                  from: 'reminders',
-                  foreignField: 'user',
-                  as: 'reminders'
-              }
-          }
-      ]);
-      const userReminders = (user.reminders) || [];
+        // compose response message to pressing Get started button
+        const greeting = `Hello ${createdUser.firstName} ${createdUser.lastName}.`;
+        const message = `${greeting} Welcome to my chatbot!`;
 
-      return sendTextMessage(senderID, composeMessageFromReminders(userReminders));
-  }
+        return sendTextMessage(senderID, message);
+    } else if (payload === 'GET_REMINDERS_LIST') {
+        const [user] = await User.aggregate([
+            {
+                $match: {
+                    facebookID: senderID
+                }
+            },
+            {
+                $lookup: {
+                    localField: '_id',
+                    from: 'reminders',
+                    foreignField: 'user',
+                    as: 'reminders'
+                }
+            }
+        ]);
+        const userReminders = (user.reminders) || [];
+
+        return sendReminders(senderID, userReminders);
+
+    } else if(payload.includes('REMOVE_REMINDER')) {
+        const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
+
+        await Reminder.findByIdAndDelete(reminderId);
+
+        return sendTextMessage(senderID, `Reminder is deleted successfully`);
+    } else if(payload.startsWith('MUTE_REMINDER')) {
+        const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
+
+        await Reminder.findOneAndUpdate({_id: reminderId}, {$set: {isMuted: true}}, {new: true});
+
+        return sendTextMessage(senderID, `Reminder is muted successfully`);
+    } else if(payload.startsWith('UNMUTE_REMINDER')) {
+        const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
+
+        await Reminder.findOneAndUpdate({_id: reminderId}, {$set: {isMuted: false}}, {new: true});
+
+        return sendTextMessage(senderID, `Reminder is unmuted successfully`);
+    }
 };
