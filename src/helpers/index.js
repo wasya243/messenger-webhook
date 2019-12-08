@@ -2,6 +2,15 @@ const fetch = require('node-fetch');
 
 const {FACEBOOK_ACCESS_TOKEN} = process.env;
 
+function getUserInfo(userId, fields) {
+    const fieldsToFetch = fields.join(',');
+
+    return fetch(
+        `https://graph.facebook.com/v5.0/${userId}?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=${fieldsToFetch}`,
+        {method: 'GET'}
+    );
+}
+
 function sendTextMessage(userId, text) {
     return fetch(
         `https://graph.facebook.com/v5.0/me/messages?access_token=${FACEBOOK_ACCESS_TOKEN}`,
@@ -73,5 +82,6 @@ function sendReminders(userId, reminders) {
 
 module.exports = {
     sendTextMessage,
-    sendReminders
+    sendReminders,
+    getUserInfo
 };
