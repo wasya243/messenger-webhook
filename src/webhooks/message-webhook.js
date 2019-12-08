@@ -1,5 +1,5 @@
-const processMessage = require('./process-message');
-const processPostback = require('./process-postback');
+const processMessage = require('../process-events/process-message');
+const processPostback = require('../process-events/process-postback');
 
 module.exports = (req, res) => {
     // according to the docs I should respond 200 ok to all webhook events

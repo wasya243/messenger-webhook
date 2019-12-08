@@ -2,7 +2,7 @@ const dialogflow = require('dialogflow');
 const uuid = require('uuid');
 
 // const sendTextMessage = require('./send-message');
-const {sendTextMessage} = require('./helpers');
+const {sendTextMessage} = require('../helpers/index');
 
 const {DIALOGFLOW_PRIVATE_KEY, DIALOGFLOW_CLIENT_EMAIL, PROJECT_ID} = process.env;
 

@@ -4,7 +4,7 @@ const {
     removeReminder,
     getRemindersList,
     gettingStarted
-} = require('./postback-handlers');
+} = require('../postback-handlers/index');
 
 module.exports = async (event) => {
     const payload = event.postback.payload;
