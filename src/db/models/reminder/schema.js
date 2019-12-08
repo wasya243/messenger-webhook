@@ -13,6 +13,10 @@ const reminderSchema = new mongoose.Schema({
         type: mongooseTypes.String,
         required: true
     },
+    isMuted: {
+        type: mongooseTypes.Boolean,
+        default: false
+    },
     createdAt: {
         type: mongooseTypes.Date,
         default: Date.now()
