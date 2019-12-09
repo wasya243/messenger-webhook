@@ -27,19 +27,36 @@ module.exports = async (event) => {
     const userId = event.sender.id;
     const message = event.message.text;
 
-    if(reminderBuffer[userId]) {
-        if(reminderBuffer[userId].createReminderIsPressed.status) {
+    // TODO: rework using redis when I have time
+    if (reminderBuffer[userId]) {
+        if (reminderBuffer[userId].createReminderIsPressed.status && !reminderBuffer[userId].reminderTextIsEntered.status) {
             reminderBuffer[userId].reminderTextIsEntered = {status: true, text: message};
+            await sendTextMessage(userId, 'When should I remind you about it? Enter the date in mm/dd/yy format.');
+        } else if (reminderBuffer[userId].reminderTextIsEntered.status && !reminderBuffer[userId].reminderDateIsEntered.status) {
+            // TODO: add date validation & timezone when I have time
+            // to fetch user time zone follow this --> https://stackoverflow.com/questions/37435222/how-can-we-get-fb-users-timezone-with-fb-sender-id-using-graph-api
+            reminderBuffer[userId].reminderDateIsEntered = {status: true, date: new Date(message)};
+
+            console.log('before new Date', message);
+            console.log('after new Date', new Date(message));
+
+            // find user to attach reminder to
             const user = await User.findOne({facebookID: userId});
 
-            const reminderData = {user: user._id, comment: reminderBuffer[userId].reminderTextIsEntered.text };
+            // compose reminder data from reminder buffer by user id
+            const reminderData = {
+                user: user._id,
+                comment: reminderBuffer[userId].reminderTextIsEntered.text,
+                dateOfAlert: reminderBuffer[userId].reminderDateIsEntered.date
+            };
 
             await new Reminder(reminderData).save();
 
-            await sendTextMessage(userId, 'Reminder is successfully created');
-
+            // delete reminder from reminder buffer
             reminderBuffer[userId].reminderIsCreated = {status: true};
             delete reminderBuffer[userId];
+
+            await sendTextMessage(userId, 'Reminder is successfully created');
         }
     } else {
         // TODO: start using dialogflow api to fetch data from reminder text

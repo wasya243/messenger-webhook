@@ -17,6 +17,7 @@ function initReminderStateForUser(userId) {
     reminderBuffer[userId] = {};
     reminderBuffer[userId].createReminderIsPressed = {status: true};
     reminderBuffer[userId].reminderTextIsEntered = {status: false, text: null};
+    reminderBuffer[userId].reminderDateIsEntered = {status: false, date: null};
     reminderBuffer[userId].reminderIsCreated = {status: false}
 }
 
@@ -36,7 +37,6 @@ async function processPostback(event) {
     } else if (payload.startsWith('UNMUTE_REMINDER')) {
         await unmuteReminder(payload, senderID);
     } else if (payload === 'CREATE_REMINDER') {
-        console.log('create reminder');
         initReminderStateForUser(senderID);
         await sendTextMessage(senderID, 'What should I remind you about?');
     }
