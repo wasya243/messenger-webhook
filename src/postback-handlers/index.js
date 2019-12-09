@@ -49,6 +49,9 @@ async function getRemindersList(senderID) {
         }
     ]);
     const userReminders = (user.reminders) || [];
+    // I know that it is better to do a db sorting (unwind->sort->group->project), but in this case we'll work with small volumes of data
+    // and it is faster to implement this solution
+    userReminders.sort((reminder1, reminder2) => reminder1.createdAt - reminder2.createdAt);
 
     return sendReminders(senderID, userReminders);
 }

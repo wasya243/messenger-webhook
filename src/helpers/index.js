@@ -36,8 +36,11 @@ function sendReminders(userId, reminders) {
 
     const elements = reminders.map(reminder => {
         return {
-            // TODO: think of how to send image
-            image_url: 'https://ibb.co/xFmS8Z9',
+            // image is not displayed if it is hosted from the same domain (((
+            // image_url: 'https://68b0c637.ngrok.io/static/bell-muted.jpg',
+            image_url: reminder.isMuted
+                ? 'https://image.shutterstock.com/image-photo/image-150nw-746726305.jpg'
+                : 'https://image.shutterstock.com/image-photo/image-150nw-152649632.jpg',
             title: 'Reminder',
             subtitle: reminder.comment,
             buttons: [
