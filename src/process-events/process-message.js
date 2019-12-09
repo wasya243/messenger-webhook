@@ -31,6 +31,7 @@ module.exports = async (event) => {
     if (reminderBuffer[userId]) {
         if (reminderBuffer[userId].createReminderIsPressed.status && !reminderBuffer[userId].reminderTextIsEntered.status) {
             reminderBuffer[userId].reminderTextIsEntered = {status: true, text: message};
+            // TODO: add time from date
             await sendTextMessage(userId, 'When should I remind you about it? Enter the date in mm/dd/yy format.');
         } else if (reminderBuffer[userId].reminderTextIsEntered.status && !reminderBuffer[userId].reminderDateIsEntered.status) {
             // TODO: add date validation & timezone when I have time
