@@ -8,12 +8,11 @@ const {
 const {sendTextMessage} = require('../helpers');
 
 
-// TODO: rework with redis
+// TODO: rework with redis when I have time
 const reminderBuffer = {};
 
 // I know that shared variables are bad practice, but in this case it is needed
 function initReminderStateForUser(userId) {
-    // TODO implement reminder date later
     reminderBuffer[userId] = {};
     reminderBuffer[userId].createReminderIsPressed = {status: true};
     reminderBuffer[userId].reminderTextIsEntered = {status: false, text: null};
