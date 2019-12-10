@@ -1,7 +1,7 @@
 const dialogflow = require('dialogflow');
 const uuid = require('uuid');
 
-const {sendTextMessage} = require('../helpers/index');
+const {sendTextMessage, getUserInfo} = require('../helpers/index');
 const {reminderBuffer} = require('./process-postback');
 const {Reminder} = require('../db/models/reminder');
 const {User} = require('../db/models/user');
@@ -31,15 +31,17 @@ module.exports = async (event) => {
     if (reminderBuffer[userId]) {
         if (reminderBuffer[userId].createReminderIsPressed.status && !reminderBuffer[userId].reminderTextIsEntered.status) {
             reminderBuffer[userId].reminderTextIsEntered = {status: true, text: message};
-            // TODO: add time from date
+            // TODO: add time to (hh:mm) date
             await sendTextMessage(userId, 'When should I remind you about it? Enter the date in mm/dd/yy format.');
         } else if (reminderBuffer[userId].reminderTextIsEntered.status && !reminderBuffer[userId].reminderDateIsEntered.status) {
             // TODO: add date validation & timezone when I have time
             // to fetch user time zone follow this --> https://stackoverflow.com/questions/37435222/how-can-we-get-fb-users-timezone-with-fb-sender-id-using-graph-api
             reminderBuffer[userId].reminderDateIsEntered = {status: true, date: new Date(message)};
 
-            console.log('before new Date', message);
-            console.log('after new Date', new Date(message));
+            // issue with time zone https://stackoverflow.com/questions/14442083/facebook-api-timezone-and-country
+            // const response = await getUserInfo(userId, ['timezone']);
+            // const userInfo = await response.json();
+            // console.log('user timezone', userInfo.timezone);
 
             // find user to attach reminder to
             const user = await User.findOne({facebookID: userId});
@@ -51,6 +53,7 @@ module.exports = async (event) => {
                 dateOfAlert: reminderBuffer[userId].reminderDateIsEntered.date
             };
 
+            // TODO: add scheduling of reminder using node-schedule https://www.npmjs.com/package/node-schedule
             await new Reminder(reminderData).save();
 
             // delete reminder from reminder buffer

@@ -17,6 +17,7 @@ async function removeReminder(payload, senderID) {
 }
 
 async function muteReminder(payload, senderID) {
+    // TODO: add scheduling when I have time (unschedule) https://www.npmjs.com/package/node-schedule
     const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
 
     await Reminder.findOneAndUpdate({_id: reminderId}, {$set: {isMuted: true}}, {new: true});
@@ -25,6 +26,7 @@ async function muteReminder(payload, senderID) {
 }
 
 async function unmuteReminder(payload, senderID) {
+    // TODO: add scheduling when I have time https://www.npmjs.com/package/node-schedule
     const reminderId = mongooseTypes.ObjectId(payload.split('/').pop());
 
     await Reminder.findOneAndUpdate({_id: reminderId}, {$set: {isMuted: false}}, {new: true});
