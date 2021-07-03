@@ -17,6 +17,10 @@ const reminderSchema = new mongoose.Schema({
         type: mongooseTypes.Boolean,
         default: false
     },
+    dateOfAlert: {
+        type: mongooseTypes.Date,
+        required: true
+    },
     createdAt: {
         type: mongooseTypes.Date,
         default: Date.now()
